@@ -28,13 +28,14 @@ const tiktod = require('tiktok-scraper')
 const ffmpeg = require('fluent-ffmpeg')
 const { removeBackgroundFromImageFile } = require('remove.bg')
 const welkom = JSON.parse(fs.readFileSync('./src/welkom.json'))
+const antilink = JSON.parse(fs.readFileSync('./database/group/antilink.json'))
 const nsfw = JSON.parse(fs.readFileSync('./src/nsfw.json'))
 const samih = JSON.parse(fs.readFileSync('./src/simi.json'))
 const vcard = 'BEGIN:VCARD\n' 
             + 'VERSION:3.0\n' 
             + 'FN:Affis Admin\n' 
             + 'ORG: Pengembang XBot;\n' 
-            + 'TEL;type=CELL;type=VOICE;waid=5511973027044:+55 11 97302-7044\n' 
+            + 'TEL;type=CELL;type=VOICE;waid=5521976394573:+55 21 97639-4573\n' 
             + 'END:VCARD' 
 prefix = '/'
 blocked = []          
@@ -179,6 +180,7 @@ client.on('group-participants-update', async (anu) => {
             const groupAdmins = isGroup ? getGroupAdmins(groupMembers) : ''
 			const isBotGroupAdmins = groupAdmins.includes(botNumber) || false
 			const isGroupAdmins = groupAdmins.includes(sender) || false
+			const isAntiLink = isGroup ? antilink.includes(from) : false
 			const isWelkom = isGroup ? welkom.includes(from) : false
 			const isNsfw = isGroup ? nsfw.includes(from) : false
 			const isSimi = isGroup ? samih.includes(from) : false
@@ -196,6 +198,31 @@ client.on('group-participants-update', async (anu) => {
 				(id == null || id == undefined || id == false) ? client.sendMessage(from, teks.trim(), extendedText, {contextInfo: {"mentionedJid": memberr}}) : client.sendMessage(from, teks.trim(), extendedText, {quoted: mek, contextInfo: {"mentionedJid": memberr}})
 			}
 
+// ANTI LINK GRUP
+                if (mesejAnti.includes("://chat.whatsapp.com/")){
+		        if (!isGroup) return
+		        if (!isAntiLink) return
+		        if (isGroupAdmins) return reply('admin de grupo são livres:v')
+		        baby.updatePresence(from, Presence.composing)
+		        if (mesejAnti.includes("#izinbos")) return reply("Sim mana, não spam")
+		        var kic = `${sender.split("@")[0]}@s.whatsapp.net`
+		        reply(`Adeus ${sender.split("@")[0]} Nao pode link demonio😡`)
+		        setTimeout( () => {
+			        baby.groupRemove(from, [kic]).catch((e)=>{reply(`BOT PRECISA SER ADMIN`)})
+		        }, 3000)
+		        setTimeout( () => {
+			        baby.updatePresence(from, Presence.composing)
+			        reply("Se considere um cara morto :v")
+		        }, 2000)
+		        setTimeout( () => {
+			        baby.updatePresence(from, Presence.composing)
+			        reply("Adeus")
+		        }, 1000)
+		        setTimeout( () => {
+			        baby.updatePresence(from, Presence.composing)
+			        reply("Va postar no cabare da sua mae?")
+		        }, 0)
+		       
 			colors = ['red','white','black','blue','yellow','green']
 			const isMedia = (type === 'imageMessage' || type === 'videoMessage')
 			const isQuotedImage = type === 'extendedTextMessage' && content.includes('imageMessage')
@@ -460,7 +487,30 @@ case 'lofi':
 							fs.unlinkSync(rano)
 						})
 					})
-					break
+				break
+                                case 'antilink':
+                  if (isBanned) return reply(nad.baned())				
+					if (!isGroup) return reply(nad.groupo())
+					if (!isGroupAdmins) return reply(nad.admin())
+					if (!isBotGroupAdmins) return reply(nad.badmin())					
+					if (args.length < 1) return reply('digite 1 para ativar')
+					if (Number(args[0]) === 1) {
+						if (isAntiLink) return reply('ESTA DESATIVADO?')
+						antilink.push(from)
+						fs.writeFileSync('./database/group/antilink.json', JSON.stringify(antilink))
+						reply('「 SUCESSO」ATIVAR ANTI LINKS NO GRUPO')
+						baby.sendMessage(from,`ALERTA!!! Se nao ser administrador nao envie links de grupo`, text)
+					} else if (Number(args[0]) === 0) {
+						if (!isAntiLink) return reply('SÓ ESPERAR?')
+						var ini = anti.botLangsexOf(from)
+						antilink.splice(ini, 1)
+						fs.writeFileSync('./database/group/antilink.json', JSON.stringify(antilink))
+						reply('「 SUCESSO 」ANTI LINK DESLIGADO NO GRUPO')
+					} else {
+						reply('1 ativar, 0 desabilitar')
+					}
+					break					
+						break
 				case 'setprefix':
 				case 'sigla':
 					if (args.length < 1) return
@@ -515,7 +565,7 @@ case 'lofi':
 				await client.client.leaveGroup(from, 'adeus...', groupId)
                     break
 				case 'bc': 
-					if (!isOwner) return reply(' so meu criador') 
+					if (!isOwner) return reply(' só o reizin goxtoso') 
 					if (args.length < 1) return reply('.......')
 					anu = await client.chats.all()
 					if (isMedia && !mek.message.videoMessage || isQuotedImage) {
